@@ -1,8 +1,10 @@
+import Text from './components/atoms/Text';
+
 function App() {
   return (
     <div>
-      <h1>Pawchi Blind Boxes</h1>
-      <p>Pequeñas cajas, grandes sorpresas.</p>
+      <Text variant="h1">Pawchi Blind Boxes</Text>
+      <Text>Pequeñas cajas, grandes sorpresas.</Text>
     </div>
   );
 }
