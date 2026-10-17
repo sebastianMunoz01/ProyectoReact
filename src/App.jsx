@@ -1,10 +1,29 @@
+import { useState } from 'react';
 import Text from './components/atoms/Text';
+import Button from './components/atoms/Button';
 
 function App() {
+  const [mensaje, setMensaje] = useState('');
+
+  function mostrarInformacion() {
+    setMensaje(
+      'Pawchi es una tienda de figuras coleccionables sorpresa.'
+    );
+  }
+
   return (
-    <div>
+    <div className="container py-4">
       <Text variant="h1">Pawchi Blind Boxes</Text>
+
       <Text>Pequeñas cajas, grandes sorpresas.</Text>
+
+      <Button variant="primary" onClick={mostrarInformacion}>
+        Conocer Pawchi
+      </Button>
+
+      {mensaje !== '' && (
+        <Text className="mt-3">{mensaje}</Text>
+      )}
     </div>
   );
 }
