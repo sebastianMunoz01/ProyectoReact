@@ -1,5 +1,6 @@
 import Button from '../components/atoms/Button';
 import Text from '../components/atoms/Text';
+import { calcularTotalCarrito } from '../data/carrito';
 
 function Cart({
   carrito,
@@ -8,11 +9,8 @@ function Cart({
   vaciarCarrito,
   continuarCompra,
 }) {
-  let total = 0;
-
-  for (let i = 0; i < carrito.length; i++) {
-    total = total + carrito[i].precio * carrito[i].cantidad;
-  }
+  
+  const total = calcularTotalCarrito(carrito);
 
   if (carrito.length === 0) {
     return (
@@ -100,7 +98,7 @@ function Cart({
           Vaciar carrito
         </Button>
 
-        <Button onClick={continuarCompra}>
+        <Button onClick={continuarCompra} disabled={!continuarCompra}>
           Continuar compra
         </Button>
       </div>
