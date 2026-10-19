@@ -1,0 +1,36 @@
+/* este arreglo contiene los productos iniciales de la tienda. */
+export const productosBase = [
+  {
+    id: 1,
+    codigo: "PAW001",
+    nombre: "Everyday Chaos",
+    descripcion: "Una caja sorpresa con pequenas aventuras cotidianas.",
+    precio: 9990,
+    stock: 12,
+    stockCritico: 3,
+    categoria: "Cotidianos",
+    imagen: "/img/blindbox-everyday-chaos.png",
+  },
+  {
+    id: 2,
+    codigo: "PAW002",
+    nombre: "Fantasy Pups",
+    descripcion: "Una caja sorpresa con perritos magicos.",
+    precio: 10990,
+    stock: 8,
+    stockCritico: 2,
+    categoria: "Fantasia",
+    imagen: "/img/blindbox-fantasy-pups.png",
+  },
+  {
+    id: 3,
+    codigo: "PAW003",
+    nombre: "Foodies",
+    descripcion: "Una caja sorpresa con perritos inspirados en comidas.",
+    precio: 9990,
+    stock: 10,
+    stockCritico: 3,
+    categoria: "Comida",
+    imagen: "/img/blindbox-foodies.png",
+  },
+];
