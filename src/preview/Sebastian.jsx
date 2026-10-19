@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import { datosIniciales, crearProducto, actualizarProducto, eliminarProducto } from '../data/datos';
+import { datosIniciales, crearProducto, actualizarProducto,
+  eliminarProducto } from '../data/datos';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Contact from '../pages/Contact';
 import Profile from '../pages/Profile';
+import Admin from '../pages/Admin';
 
 function Sebastian() {
   const [datos, setDatos] = useState(() => {
@@ -166,7 +168,10 @@ function Sebastian() {
         <Route path="/contacto" element={<Contact guardarMensaje={guardarMensaje} />} />
         <Route path="/perfil" element={<Profile usuario={usuario}
           pedidos={datos.pedidos} />} />
-        <Route path="/admin" element={<h1>Panel en el siguiente PR</h1>} />
+        <Route path="/admin" element={<Admin datos={datos} usuario={usuario}
+          guardarProducto={guardarProducto} borrarProducto={borrarProducto}
+          guardarCategoria={guardarCategoria} borrarCategoria={borrarCategoria}
+          guardarUsuario={guardarUsuario} editarUsuario={editarUsuario} />} />
         <Route path="*" element={<h1>Página no encontrada</h1>} />
       </Routes>
     </main>
