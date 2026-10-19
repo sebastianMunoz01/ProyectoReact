@@ -1,8 +1,14 @@
-export default function Campo({ id, label, value, onChange, ...props }) {
+import Input from "../atoms/Input";
+
+function Campo({ id, label, ...props }) {
   return (
     <div className="mb-3">
-      <label htmlFor={id} className="form-label">{label}</label>
-      <input id={id} className="form-control" value={value} onChange={onChange} {...props} />
+      <label className="form-label" htmlFor={id}>
+        {label}
+      </label>
+      <Input id={id} {...props} />
     </div>
   );
 }
+
+export default Campo;
