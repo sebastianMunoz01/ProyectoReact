@@ -19,6 +19,11 @@ import Contact from './pages/Contact';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import Button from './components/atoms/Button';
+import ShopLayout from './components/templates/ShopLayout';
+import Home from './pages/Home';
+import About from './pages/About';
+import Blog from './pages/Blog';
+import BlogDetail from './pages/BlogDetail';
 
 import {
   leerDatos,
@@ -371,49 +376,17 @@ function App() {
   }
 
   return (
-    <div className="container py-4">
-      <h1>Pawchi Blind Boxes</h1>
-
-      <nav className="d-flex flex-wrap align-items-center gap-3 mb-4">
-        <Link to="/">Inicio</Link>
-        <Link to="/catalogo">Catálogo</Link>
-        <Link to="/categorias">Categorías</Link>
-        <Link to="/ofertas">Ofertas</Link>
-        <Link to="/carrito">Carrito ({cantidad})</Link>
-        <Link to="/contacto">Contacto</Link>
-
-        {usuario === null ? (
-          <>
-            <Link to="/login">Ingresar</Link>
-            <Link to="/registro">Registro</Link>
-          </>
-        ) : (
-          <>
-            <Link to="/perfil">{usuario.nombre}</Link>
-
-            {(usuario.tipo === 'Administrador' ||
-              usuario.tipo === 'Vendedor') && (
-              <Link to="/admin">Panel</Link>
-            )}
-
-            <Button variant="outline-secondary" onClick={salir}>
-              Salir
-            </Button>
-          </>
-        )}
-      </nav>
-
-      {mensaje !== '' && (
-        <p role="status" className="alert alert-info">
-          {mensaje}
-        </p>
-      )}
-
+    <ShopLayout
+      usuario={usuario}
+      cantidad={cantidad}
+      salir={salir}
+      mensaje={mensaje}
+    >
       <Routes>
         <Route
           path="/"
           element={
-            <Catalog
+            <Home
               productos={datos.productos}
               agregarAlCarrito={agregarAlCarrito}
             />
@@ -532,13 +505,28 @@ function App() {
             editarUsuario={editarUsuario}
           />}
         />
-        
+
+        <Route 
+          path="/nosotros" 
+          element={<About />} 
+        />
+
+        <Route 
+          path="/blog" 
+          element={<Blog />} 
+        />
+
+        <Route 
+          path="/blog/:id" 
+          element={<BlogDetail />} 
+        />
+
         <Route
           path="*"
           element={<h2>Página no encontrada</h2>}
         />
       </Routes>
-    </div>
+    </ShopLayout>
   );
 }
 
