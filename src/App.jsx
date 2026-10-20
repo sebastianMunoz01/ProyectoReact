@@ -13,8 +13,20 @@ import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import PurchaseResult from './pages/PurchaseResult';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Contact from './pages/Contact';
+import Profile from './pages/Profile';
+import Admin from './pages/Admin';
+import Button from './components/atoms/Button';
 
-import { leerDatos, guardarDatos } from './data/datos';
+import {
+  leerDatos,
+  guardarDatos,
+  crearProducto,
+  actualizarProducto,
+  eliminarProducto,
+} from './data/datos';
 import {
   agregarProductoAlCarrito,
   cambiarCantidadDelCarrito,
@@ -41,6 +53,14 @@ function ResultadoCompra({ pedidos }) {
 function App() {
   const [datos, setDatos] = useState(leerDatos);
   const [mensaje, setMensaje] = useState('');
+  const [usuarioId, setUsuarioId] = useState(() => {
+    const idGuardado = sessionStorage.getItem('pawchiUsuarioId');
+
+    return idGuardado === null ? null : Number(idGuardado);
+  });
+
+  const usuario = datos.usuarios.find((persona) => persona.id === usuarioId) || null;
+  
   const navigate = useNavigate();
 
   function actualizarDatos(nuevosDatos) {
@@ -51,6 +71,198 @@ function App() {
     } catch {
       setMensaje('No se pudieron guardar los cambios.');
       return false;
+    }
+  }
+
+  function iniciarSesion(persona){
+    sessionStorage.setItem('pawchiUsuarioId', String(persona.id));
+    setUsuarioId(persona.id);
+    setMensaje('');
+  }
+
+  function salir() {
+    sessionStorage.removeItem('pawchiUsuarioId');
+    setUsuarioId(null);
+    setMensaje('');
+    navigate('/');
+  }
+
+  function guardarUsuario(persona) {
+    return actualizarDatos({
+      ...datos,
+      usuarios: [...datos.usuarios, persona],
+    });
+  }
+
+  function guardarMensaje(nuevoMensaje) {
+    return actualizarDatos({
+      ...datos,
+      mensajes: [...datos.mensajes, nuevoMensaje],
+    });
+  }
+
+  function editarUsuario(id, nombre, tipo) {
+    if (!usuario || usuario.tipo !== 'Administrador') {
+      return false;
+  }
+
+  if (!nombre.trim() || nombre.length > 50) {
+    setMensaje('Revisa el nombre del usuario.');
+    return false;
+  }
+
+  if (id === usuario.id && tipo !== 'Administrador') {
+    setMensaje('No puedes quitar tu propio rol de administrador.');
+    return false;
+  }
+
+  const nuevosUsuarios = datos.usuarios.map((persona) =>
+    persona.id === id
+      ? { ...persona, nombre: nombre.trim(), tipo: tipo }
+      : persona
+  );
+
+  return actualizarDatos({
+    ...datos,
+    usuarios: nuevosUsuarios,
+  });
+}
+
+    function guardarProducto(producto) {
+  if (!usuario || usuario.tipo !== 'Administrador') {
+    return false;
+  }
+
+  let nuevosProductos;
+
+  if (producto.id) {
+    nuevosProductos = actualizarProducto(datos.productos, producto);
+  } else {
+    nuevosProductos = crearProducto(datos.productos, producto);
+  }
+
+  const nuevoCarrito = [];
+
+  for (let i = 0; i < datos.carrito.length; i++) {
+    const item = datos.carrito[i];
+
+    const actual = nuevosProductos.find(
+      (producto) => producto.id === item.id
+    );
+
+    if (actual && actual.stock > 0) {
+      nuevoCarrito.push({
+        ...actual,
+        cantidad: Math.min(item.cantidad, actual.stock),
+      });
+    }
+  }
+
+  return actualizarDatos({
+    ...datos,
+    productos: nuevosProductos,
+    carrito: nuevoCarrito,
+  });
+}
+
+  function borrarProducto(id) {
+    if (!usuario || usuario.tipo !== 'Administrador') {
+      return;
+    }
+
+    const guardado = actualizarDatos({
+      ...datos,
+      productos: eliminarProducto(datos.productos, id),
+      carrito: datos.carrito.filter((item) => item.id !== id),
+    });
+
+    if (guardado) {
+      setMensaje('Producto eliminado.');
+    }
+  }
+  
+  function guardarCategoria(nombre, anterior) {
+  if (!usuario || usuario.tipo !== 'Administrador') {
+    return false;
+  }
+
+  nombre = nombre.trim();
+
+  if (!nombre || nombre.length > 80) {
+    setMensaje('Revisa el nombre de la categoría.');
+    return false;
+  }
+
+  const repetida = datos.categorias.some(
+    (categoria) =>
+      categoria.toLowerCase() === nombre.toLowerCase() &&
+      categoria !== anterior
+  );
+
+  if (repetida) {
+    setMensaje('La categoría ya existe.');
+    return false;
+  }
+
+  let nuevasCategorias;
+
+  if (anterior === '') {
+    nuevasCategorias = [...datos.categorias, nombre];
+  } else {
+    nuevasCategorias = datos.categorias.map((categoria) =>
+      categoria === anterior ? nombre : categoria
+    );
+  }
+
+  const nuevosProductos = datos.productos.map((producto) =>
+    producto.categoria === anterior
+      ? { ...producto, categoria: nombre }
+      : producto
+  );
+
+  const nuevoCarrito = datos.carrito.map((producto) =>
+    producto.categoria === anterior
+      ? { ...producto, categoria: nombre }
+      : producto
+  );
+
+  const guardado = actualizarDatos({
+    ...datos,
+    categorias: nuevasCategorias,
+    productos: nuevosProductos,
+    carrito: nuevoCarrito,
+  });
+
+  if (guardado) {
+    setMensaje('Categoría guardada.');
+  }
+
+  return guardado;
+}
+
+  function borrarCategoria(nombre) {
+    if (!usuario || usuario.tipo !== 'Administrador') {
+      return;
+    }
+
+    const tieneProductos = datos.productos.some(
+      (producto) => producto.categoria === nombre
+    );
+
+    if (tieneProductos) {
+      setMensaje('No puedes eliminar una categoría con productos.');
+      return;
+    }
+
+    const guardado = actualizarDatos({
+      ...datos,
+      categorias: datos.categorias.filter(
+        (categoria) => categoria !== nombre
+      ),
+    });
+
+    if (guardado) {
+      setMensaje('Categoría eliminada.');
     }
   }
 
@@ -162,12 +374,33 @@ function App() {
     <div className="container py-4">
       <h1>Pawchi Blind Boxes</h1>
 
-      <nav className="d-flex flex-wrap gap-3 mb-4">
+      <nav className="d-flex flex-wrap align-items-center gap-3 mb-4">
         <Link to="/">Inicio</Link>
         <Link to="/catalogo">Catálogo</Link>
         <Link to="/categorias">Categorías</Link>
         <Link to="/ofertas">Ofertas</Link>
         <Link to="/carrito">Carrito ({cantidad})</Link>
+        <Link to="/contacto">Contacto</Link>
+
+        {usuario === null ? (
+          <>
+            <Link to="/login">Ingresar</Link>
+            <Link to="/registro">Registro</Link>
+          </>
+        ) : (
+          <>
+            <Link to="/perfil">{usuario.nombre}</Link>
+
+            {(usuario.tipo === 'Administrador' ||
+              usuario.tipo === 'Vendedor') && (
+              <Link to="/admin">Panel</Link>
+            )}
+
+            <Button variant="outline-secondary" onClick={salir}>
+              Salir
+            </Button>
+          </>
+        )}
       </nav>
 
       {mensaje !== '' && (
@@ -263,7 +496,43 @@ function App() {
           path="/compra/:id"
           element={<ResultadoCompra pedidos={datos.pedidos} />}
         />
+        
+        <Route
+          path="/login"
+          element={<Login usuarios={datos.usuarios} iniciarSesion={iniciarSesion}/>}
+        />
 
+        <Route
+          path="/registro"
+          element={<Register usuarios={datos.usuarios} guardarUsuario={guardarUsuario}/>}
+        />
+
+        <Route
+          path="/contacto"
+          element={<Contact guardarMensaje={guardarMensaje} />}
+        />
+
+        <Route
+          path="/perfil"
+          element={
+          <Profile usuario={usuario} pedidos={datos.pedidos}/>}
+        />
+
+        <Route
+          path="/admin"
+          element={
+          <Admin
+            datos={datos}
+            usuario={usuario}
+            guardarProducto={guardarProducto}
+            borrarProducto={borrarProducto}
+            guardarCategoria={guardarCategoria}
+            borrarCategoria={borrarCategoria}
+            guardarUsuario={guardarUsuario}
+            editarUsuario={editarUsuario}
+          />}
+        />
+        
         <Route
           path="*"
           element={<h2>Página no encontrada</h2>}
